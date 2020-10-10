@@ -3,6 +3,10 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+
 @SuppressWarnings("unused")
 public class JavaAlgorithms {
     /**
@@ -97,8 +101,32 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
+    // Решение "В лоб"
+    // Трудоемкость O(n ^ 3) худший случай, n - длинна строки
+    // Ресурсоемкость O(n).
+    static public String longestCommonSubstring(String first, String second) {
+        first = first.replaceAll("\\n", " ");
+        second = second.replaceAll("\\n", " ");
+
+        String longestSubstring = "";
+
+        for (int i = 0; i < first.length(); i++) { // O(n)
+            for (int j = 0; j < second.length(); j++) { // O(n)
+                if (first.charAt(i) == second.charAt(j)) {
+                    int count = 1;
+                    while ((i + count) < first.length() && (j + count) < second.length() &&
+                            first.charAt(i + count) == second.charAt(j + count)) { // O(n) в худшем
+                        count++;
+                    }
+                    String substring = first.substring(i, i + count);
+                    if (longestSubstring.length() < substring.length()) {
+                        longestSubstring = substring;
+                    }
+                }
+            }
+        }
+
+        return longestSubstring;
     }
 
     /**
@@ -111,7 +139,62 @@ public class JavaAlgorithms {
      * Справка: простым считается число, которое делится нацело только на 1 и на себя.
      * Единица простым числом не считается.
      */
+    // Упрощенное Решето Аткина (Википедийное решение. Я бы просто перебором всех делителей решал до гуглинга :0 )
+    // Трудоемкость O(n) , n - limit.
+    // Ресурсоемкость O(n).
     static public int calcPrimesNumber(int limit) {
-        throw new NotImplementedError();
+        boolean[] isPrime = new boolean[limit + 1];
+
+        double sqrt = Math.sqrt(limit);
+        int x2;
+        int y2;
+        int n;
+        for (int x = 1; x <= sqrt; x++) { // O(sqrt(n))
+            for (int y = 1; y <= sqrt; y++) { // O(sqrt(n))
+                x2 = x * x;
+                y2 = y * y;
+                n = 4 * x2 + y2;
+                if (n <= limit && (n % 12 == 1 || n % 12 == 5)) {
+                    isPrime[n] = !isPrime[n];
+                }
+                n = 3 * x2 + y2;
+                if (n <= limit && n % 12 == 7) {
+                    isPrime[n] = !isPrime[n];
+                }
+                n = 3 * x2 - y2;
+                if (x > y && n <= limit && n % 12 == 11) {
+                    isPrime[n] = !isPrime[n];
+                }
+            }
+        }
+
+        // Грубая оценка меньше O(n)
+        if (isPrime.length > 5) {
+            for (int i = 5; i < sqrt; i += 2) { // O(sqrt(n))
+                if (isPrime[i]) { // O(1) для не прайм чисел
+                    int i2 = i * i;
+                    for (int j = i2; j <= limit; j += i2) {
+                        isPrime[j] = false;
+                    }
+                }
+            }
+        }
+
+        if (isPrime.length > 2) {
+            isPrime[2] = true;
+        }
+
+        if (isPrime.length > 3) {
+            isPrime[3] = true;
+        }
+
+        int count = 0;
+        for (boolean bool : isPrime) { // O(n)
+            if (bool) {
+                count++;
+            }
+        }
+
+        return count;
     }
 }

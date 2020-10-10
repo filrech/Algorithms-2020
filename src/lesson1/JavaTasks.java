@@ -2,6 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -98,8 +101,44 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
+    // Сортировка подсчетом
+    // Трудоемкость O(n + k) , n - количество строк в инпут файле , k = 7732 - верхняя граница принимаемых температурой значений
+    // Ресурсоемкость O(n)
     static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+        try {
+            File file = new File(inputName);
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            String line = bufferedReader.readLine();
+            List<Integer> temps = new ArrayList<>(); // :?
+
+            int lineCount = 0;
+            while (line != null) { // O(n)
+                temps.add((int) (Double.parseDouble(line) * 10 + 2730));
+                line = bufferedReader.readLine();
+                lineCount++;
+            }
+            bufferedReader.close();
+
+            List<Integer> count = new ArrayList<>(Collections.nCopies(7732, 0));
+            for (int i = 0; i < lineCount; i++) { //O(n)
+                count.set(temps.get(i), count.get(temps.get(i)) + 1);
+            }
+            int index = 0;
+            for (int i = 0; i < 7731; i++) { //O(k)
+                for (int j = 0; j < count.get(i); j++) { //O(n) в худшем
+                    temps.set(index, i);
+                    index++;
+                }
+            }
+
+            PrintWriter printWriter = new PrintWriter(new File(outputName));
+            for (Integer temp: temps) { // O(n)
+                printWriter.println(((double) temp - 2730) / 10);
+            }
+            printWriter.close();
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -131,8 +170,65 @@ public class JavaTasks {
      * 2
      * 2
      */
+    // Трудоемкость O(n) , n - количество строк в инпут файле
+    // Ресурсоемкость O(n).
     static public void sortSequence(String inputName, String outputName) {
-        throw new NotImplementedError();
+        try {
+            File file = new File(inputName);
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            String line = bufferedReader.readLine();
+            Map<Integer, Integer> numbers = new HashMap<>();
+
+            while (line != null) { // O(n)
+                int parseInt = Integer.parseInt(line);
+                if (numbers.containsKey(parseInt)) {
+                    numbers.put(parseInt, numbers.get(parseInt) + 1);
+                } else {
+                    numbers.put(parseInt, 1);
+                }
+                line = bufferedReader.readLine();
+            }
+            bufferedReader.close();
+
+            int keyNumber = -1;
+            int biggestSequence = -1;
+            for (Integer key: numbers.keySet()) { // O(n) в худшем
+                if (numbers.get(key) > biggestSequence) {
+                    keyNumber = key;
+                    biggestSequence = numbers.get(key);
+                }
+            }
+
+            List<Integer> keyNumbersList = new ArrayList<>();
+            for (Integer key: numbers.keySet()) { // O(n)
+                if (numbers.get(key) == biggestSequence) {
+                    keyNumbersList.add(key);
+                }
+            }
+
+            for (Integer key: keyNumbersList) { // O(n) в худшем
+                if (key < keyNumber) {
+                    keyNumber = key;
+                }
+            }
+
+            bufferedReader = new BufferedReader(new FileReader(file));
+            PrintWriter printWriter = new PrintWriter(new File(outputName));
+            line = bufferedReader.readLine();
+            while (line != null) { // O(n)
+                if (Integer.parseInt(line) != keyNumber) {
+                    printWriter.println(line);
+                }
+                line = bufferedReader.readLine();
+            }
+            for (int i = 0; i < biggestSequence; i++) { // O(n) в худшем
+                printWriter.println(keyNumber);
+            }
+            bufferedReader.close();
+            printWriter.close();
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
