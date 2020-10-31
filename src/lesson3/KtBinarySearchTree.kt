@@ -1,6 +1,8 @@
 package lesson3
 
 import java.util.*
+import kotlin.IllegalStateException
+import kotlin.NoSuchElementException
 import kotlin.math.max
 
 // attention: Comparable is supported but Comparator is not
@@ -79,8 +81,84 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
      *
      * Средняя
      */
+    // Трудоемкость O(h), h - высота дерева ( avg. O(log(n)), worst O(n) в зависимости от балансировки )
     override fun remove(element: T): Boolean {
-        TODO()
+        var parent = root
+        var current = root
+        var isLeft = true
+
+        while (current != null) {
+            val comparison = element.compareTo(current.value)
+            if (comparison == 0) {
+                break
+            }
+            parent = current
+            when {
+                comparison < 0 -> {
+                    current = current.left
+                    isLeft = true
+                }
+                else -> {
+                    current = current.right
+                    isLeft = false
+                }
+            }
+        }
+
+        if (current == null) {
+            return false
+        }
+        if (current.left == null && current.right == null) {
+            when { // DRY somehow mb
+                current == root -> root = null
+                isLeft -> parent?.left = null
+                else -> parent?.right = null
+            }
+        } else if (current.right == null) {
+            when {
+                current == root -> root = current.left
+                isLeft -> parent?.left = current.left
+                else -> parent?.right = current.left
+            }
+        } else if (current.left == null) {
+            when {
+                current == root -> root = current.right
+                isLeft -> parent?.left = current.right
+                else -> parent?.right = current.right
+            }
+        } else {
+            val successor = getSuccessor(current)
+            when {
+                current == root -> root = successor
+                isLeft -> parent?.left = successor
+                else -> parent?.right = successor
+            }
+            successor.left = current.left
+        }
+        size--
+        return true
+    }
+
+    /**
+     * Поиск преемника
+     */
+    private fun getSuccessor(node: Node<T>): Node<T> {
+        var successorParent = node
+        var successor = node
+        var current = node.right
+
+        while (current != null) {
+            successorParent = successor
+            successor = current
+            current = current.left
+        }
+
+        if (successor != node.right) {
+            successorParent.left = successor.right
+            successor.right = node.right
+        }
+
+        return successor
     }
 
     override fun comparator(): Comparator<in T>? =
@@ -90,6 +168,16 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
         BinarySearchTreeIterator()
 
     inner class BinarySearchTreeIterator internal constructor() : MutableIterator<T> {
+        // Ресурсоемкость O(h)
+        private val stack = Stack<Node<T>>()
+
+        init {
+            var node = root
+            while (node != null) {
+                stack.push(node)
+                node = node.left
+            }
+        }
 
         /**
          * Проверка наличия следующего элемента
@@ -101,10 +189,8 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
-        override fun hasNext(): Boolean {
-            // TODO
-            throw NotImplementedError()
-        }
+        // Трудоемкость O(1)
+        override fun hasNext(): Boolean = stack.isNotEmpty()
 
         /**
          * Получение следующего элемента
@@ -119,9 +205,22 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Средняя
          */
+        // Трудоемкость O(h)
+        private var result: T? = null
+        private var wasCalledTwice = false
         override fun next(): T {
-            // TODO
-            throw NotImplementedError()
+            if (!hasNext()) {
+                throw NoSuchElementException()
+            }
+            var node = stack.pop()
+            result = node.value
+            node = node.right
+            while (node != null) {
+                stack.push(node)
+                node = node.left
+            }
+            wasCalledTwice = false
+            return result as T
         }
 
         /**
@@ -136,11 +235,14 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Сложная
          */
+        // Трудоемкость O(1)
         override fun remove() {
-            // TODO
-            throw NotImplementedError()
+            if (result == null || wasCalledTwice) {
+                throw IllegalStateException()
+            }
+            wasCalledTwice = true
+            remove(result)
         }
-
     }
 
     /**

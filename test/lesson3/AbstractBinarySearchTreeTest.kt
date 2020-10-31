@@ -162,6 +162,15 @@ abstract class AbstractBinarySearchTreeTest {
             }
             println("All clear!")
         }
+
+        run {
+            val binarySet = create()
+
+            assertFalse(binarySet.remove(1))
+
+            binarySet.add(1)
+            assertTrue(binarySet.remove(1))
+        }
     }
 
     protected fun doIteratorTest() {
@@ -200,7 +209,7 @@ abstract class AbstractBinarySearchTreeTest {
                     "BinarySearchTreeIterator doesn't traverse the tree correctly."
                 )
             }
-            assertFailsWith<IllegalStateException>("Something was supposedly returned after the elements ended") {
+            assertFailsWith<NoSuchElementException>("Something was supposedly returned after the elements ended") {
                 binaryIter.next()
             }
             println("All clear!")
@@ -271,6 +280,24 @@ abstract class AbstractBinarySearchTreeTest {
                 )
             }
             println("All clear!")
+        }
+
+        run {//lol
+            val binarySet = create()
+            var iterator = binarySet.iterator()
+
+            assertFalse(iterator.hasNext())
+
+            binarySet.add(14)
+            assertTrue(binarySet.contains(14))
+            iterator = binarySet.iterator()
+            assertTrue(iterator.hasNext())
+            assertEquals(14, iterator.next())
+            iterator.remove()
+            assertFalse(binarySet.contains(14))
+            assertFailsWith<NoSuchElementException> {
+                iterator.next()
+            }
         }
     }
 
