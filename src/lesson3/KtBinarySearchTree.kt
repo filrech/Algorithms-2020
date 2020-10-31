@@ -235,7 +235,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          *
          * Сложная
          */
-        // Трудоемкость O(1)
+        // Трудоемкость O(h)
         override fun remove() {
             if (result == null || wasCalledTwice) {
                 throw IllegalStateException()
