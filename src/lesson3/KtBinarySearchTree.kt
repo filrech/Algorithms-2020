@@ -169,12 +169,12 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
 
     inner class BinarySearchTreeIterator internal constructor() : MutableIterator<T> {
         // Ресурсоемкость O(h)
-        private val stack = Stack<Node<T>>()
+        private val dq = ArrayDeque<Node<T>>()
 
         init {
             var node = root
             while (node != null) {
-                stack.push(node)
+                dq.addLast(node)
                 node = node.left
             }
         }
@@ -190,7 +190,7 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
          * Средняя
          */
         // Трудоемкость O(1)
-        override fun hasNext(): Boolean = stack.isNotEmpty()
+        override fun hasNext(): Boolean = dq.isNotEmpty()
 
         /**
          * Получение следующего элемента
@@ -212,11 +212,11 @@ class KtBinarySearchTree<T : Comparable<T>> : AbstractMutableSet<T>(), Checkable
             if (!hasNext()) {
                 throw NoSuchElementException()
             }
-            var node = stack.pop()
+            var node = dq.removeFirst()
             result = node.value
             node = node.right
             while (node != null) {
-                stack.push(node)
+                dq.addLast(node)
                 node = node.left
             }
             wasCalledTwice = false
