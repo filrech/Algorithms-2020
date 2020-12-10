@@ -2,6 +2,8 @@
 
 package lesson7
 
+import lesson7.rod.main
+
 /**
  * Наибольшая общая подпоследовательность.
  * Средняя
@@ -14,8 +16,47 @@ package lesson7
  * Если есть несколько самых длинных общих подпоследовательностей, вернуть любую из них.
  * При сравнении подстрок, регистр символов *имеет* значение.
  */
+// Алгоритм Нидлмана—Вунша
+// Трудоемкость O(n * m) , n - длинна первой строки, m - длинна второй строки
+// Ресурсоемкость O(n * m)
 fun longestCommonSubSequence(first: String, second: String): String {
-    TODO()
+    if (first.isNullOrEmpty() || second.isNullOrEmpty()) return ""
+    if (first == second) return first
+
+    var lengthFirst = first.length
+    var lengthSecond = second.length
+
+    val mainMatrix = Array(lengthFirst + 1) { IntArray(lengthSecond + 1) { 0 } }
+
+    for (i in 1..lengthFirst) {
+        for (j in 1..lengthSecond) {
+            if (first[i - 1] == second[j - 1]) {
+                mainMatrix[i][j] = mainMatrix[i - 1][j - 1] + 1
+            } else {
+                mainMatrix[i][j] = maxOf(mainMatrix[i - 1][j], mainMatrix[i][j - 1])
+            }
+        }
+    }
+
+    var result = ""
+
+    while (lengthFirst > 0 && lengthSecond > 0) {
+        when {
+            first[lengthFirst - 1] == second[lengthSecond - 1] -> {
+                result = first[lengthFirst - 1] + result
+                lengthFirst--
+                lengthSecond--
+            }
+            mainMatrix[lengthFirst - 1][lengthSecond] > mainMatrix[lengthFirst][lengthSecond - 1] -> {
+                lengthFirst--
+            }
+            else -> {
+                lengthSecond--
+            }
+        }
+    }
+
+    return result
 }
 
 /**
@@ -30,8 +71,42 @@ fun longestCommonSubSequence(first: String, second: String): String {
  * то вернуть ту, в которой числа расположены раньше (приоритет имеют первые числа).
  * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
  */
+// Трудоемкость O(n ^ 2)
+// Ресурсоемкость O(n)
+
 fun longestIncreasingSubSequence(list: List<Int>): List<Int> {
-    TODO()
+    if (list.isNullOrEmpty()) return emptyList()
+    if (list.size == 1) return list
+
+    var mainList = MutableList(list.size) { 1 }
+    var prevList = MutableList(list.size) { -1 }
+
+    for (i in list.indices) {
+        for (j in 0 until i) {
+            if (list[j] < list[i] && mainList[j] + 1 > mainList[i]) {
+                mainList[i] = mainList[j] + 1
+                prevList[i] = j
+            }
+        }
+    }
+
+    var pos = 0
+    var length = mainList[0]
+    for (i in list.indices) {
+        if (mainList[i] > length) {
+            pos = i
+            length = mainList[i]
+        }
+    }
+
+    val result = mutableListOf<Int>()
+
+    while (pos != -1) {
+        result.add(list[pos])
+        pos = prevList[pos]
+    }
+
+    return result.asReversed()
 }
 
 /**
