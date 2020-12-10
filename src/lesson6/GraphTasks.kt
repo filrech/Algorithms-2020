@@ -2,6 +2,8 @@
 
 package lesson6
 
+import kotlin.collections.ArrayDeque
+
 /**
  * Эйлеров цикл.
  * Средняя
@@ -28,6 +30,8 @@ package lesson6
  * Справка: Эйлеров цикл -- это цикл, проходящий через все рёбра
  * связного графа ровно по одному разу
  */
+// Алгоритм Флёри
+
 fun Graph.findEulerLoop(): List<Graph.Edge> {
     TODO()
 }
@@ -114,8 +118,25 @@ fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
  *
  * Ответ: A, E, J, K, D, C, H, G, B, F, I
  */
+// Трудоемкость O(V * E)
+// Ресурсоемкость O(V)
 fun Graph.longestSimplePath(): Path {
-    TODO()
+    val pathLists = ArrayDeque<Path>()
+    pathLists.addAll(vertices.map { Path(it) })
+    var longestPath = Path()
+
+    while (pathLists.isNotEmpty()) {
+        val path = pathLists.removeFirst()
+        if (path.length > longestPath.length) {
+            longestPath = path
+        }
+        val neighborList = getNeighbors(path.vertices.last()).filter { !path.contains(it) }
+        for (neighbor in neighborList) {
+            pathLists.addFirst(Path(path, this, neighbor))
+        }
+    }
+
+    return longestPath
 }
 
 /**
