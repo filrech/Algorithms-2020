@@ -69,7 +69,23 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
      * Сложная
      */
     override fun iterator(): MutableIterator<String> {
-        TODO()
+        return TrieIterator()
+    }
+
+    inner class TrieIterator internal constructor() : MutableIterator<String> {
+
+        override fun hasNext(): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun next(): String {
+            TODO("Not yet implemented")
+        }
+
+        override fun remove() {
+            TODO("Not yet implemented")
+        }
+
     }
 
 }
